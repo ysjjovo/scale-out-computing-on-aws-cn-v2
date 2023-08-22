@@ -59,14 +59,14 @@ Config:
 
   # Configure your EC2 instance used as scheduler host below
   scheduler:
-    instance_type: "m5.large" # default instance type
-    volume_size: 200 # Size of the EBS root disk
+    instance_type: "t3.small" # default instance type
+    volume_size: 8 # Size of the EBS root disk
 
   # Configure your AWS ElasticSearch/Kibana options below
   elasticsearch:
-      data_node_instance_type: "m5.large.elasticsearch" # instance type for elasticsearch data nodes
-      data_nodes: 2  # number of data nodes for elasticsearch
-      ebs_volume_size: 100  # ebs volume size attached to data nodes
+      data_node_instance_type: "t3.small.elasticsearch" # instance type for elasticsearch data nodes
+      data_nodes: 1  # number of data nodes for elasticsearch
+      ebs_volume_size: 10  # ebs volume size attached to data nodes
       deletion_policy: "NO_RETAIN"  # RETAIN will preserve the ES even if you delete the stack. Any other value will delete ES if you delete the CFN stack
 
   # Configure your AWS Secrets Manager options below
