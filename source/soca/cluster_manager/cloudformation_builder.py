@@ -78,16 +78,39 @@ def main(**params):
         # Begin LaunchTemplateData
         UserData = '''#!/bin/bash -x
 export PATH=$PATH:/usr/local/bin
+if [[ "''' + params['BaseOS'] + '''" == "centos7" ]];
+then
+    if [[ "${AWS::Region}" == "cn-north-1" ]] || [[ "${AWS::Region}" == "cn-northwest-1" ]];
+    then
+        curl -o /etc/yum.repos.d/CentOS-Base.repo https://soca-china-deployment.s3.cn-northwest-1.amazonaws.com.cn/scale-out-computing-on-aws/v2.7.0/CentOS-Base-china.repo
+    fi
+fi
+
 if [[ "''' + params['BaseOS'] + '''" == "centos7" ]] || [[ "''' + params['BaseOS'] + '''" == "rhel7" ]];
 then
-     yum install -y python3-pip
-     PIP=$(which pip3)
-     $PIP install awscli
-     yum install -y nfs-utils # enforce install of nfs-utils
+     if [[ "${AWS::Region}" == "cn-north-1" ]] || [[ "${AWS::Region}" == "cn-northwest-1" ]];
+     then
+         yum install -y python3-pip
+         PIP=$(which pip3)
+         $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+         yum install -y nfs-utils # enforce install of nfs-utils
+     else
+         yum install -y python3-pip
+         PIP=$(which pip3)
+         $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+         yum install -y nfs-utils # enforce install of nfs-utils
+     fi
 else
-     yum install -y python3-pip
-     PIP=$(which pip3)
-     $PIP install awscli
+     if [[ "${AWS::Region}" == "cn-north-1" ]] || [[ "${AWS::Region}" == "cn-northwest-1" ]];
+     then
+         yum install -y python3-pip
+         PIP=$(which pip3)
+         $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+     else
+         yum install -y python3-pip
+         PIP=$(which pip3)
+         $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+     fi
 fi
 if [[ "''' + params['BaseOS'] + '''" == "amazonlinux2" ]];
     then

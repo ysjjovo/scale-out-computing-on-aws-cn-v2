@@ -600,6 +600,7 @@ if __name__ == "__main__":
 
     # Choose region where to install SOCA
     install_parameters["region"] = get_input("What AWS region do you want to install SOCA?", args.region, accepted_regions, str)
+    china_region = True if install_parameters["region"] in ['cn-north-1', 'cn-northwest-1'] else False
 
     # Initiate boto3 client now the region is known
     ec2 = session.client("ec2", region_name=install_parameters["region"], config=boto_extra_config)
@@ -686,6 +687,9 @@ if __name__ == "__main__":
     if args.profile:
         cmd += f" --profile {args.profile}"
         cmd_bootstrap += f" --profile {args.profile}"
+
+    if china_region:
+        cmd += f" --app '{install_directory}/soca_china_regions.sh {install_directory}/cdk.out/{install_parameters['cluster_id']}.template.json'"
 
     # Adding --debug flag will output the cdk deploy command. This is helpful for troubleshooting.
     # Be careful as --ldap-password will be shown in plain text

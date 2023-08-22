@@ -176,6 +176,8 @@ class SOCAInstall(cdk.Stack):
                                             subnet_type=ec2.SubnetType.PRIVATE)
                 ]
             }
+            if install_props.Config.network.vpc_flow_logs:
+                vpc_params['flow_logs'] = [ec2.FlowLogOptions()]
             self.soca_resources["vpc"] = ec2.Vpc(self, "SOCAVpc", **vpc_params)
             core.Tags.of(self.soca_resources["vpc"]).add("Name", f"{user_specified_variables.cluster_id}-VPC")
         else:
@@ -661,6 +663,8 @@ class SOCAInstall(cdk.Stack):
                                  "%%LDAP_PASSWORD%%": user_specified_variables.ldap_password,
                                  "%%SOCA_INSTALL_AMI%%": self.soca_resources["ami_id"],
                                  "%%RESET_PASSWORD_DS_LAMBDA%%": "false" if not self.soca_resources["reset_ds_lambda"] else self.soca_resources["reset_ds_lambda"].function_arn,
+                                 "%%PIP_CHINA_MIRROR%%": install_props.Config.china.pip_china_mirror,
+                                 "%%CENTOS_CHINA_REPO%%": install_props.Config.china.centos_china_repo,
                                  "%%SOCA_AUTH_PROVIDER%%": install_props.Config.directoryservice.provider,
                                  "%%SOCA_LDAP_BASE%%": "false" if install_props.Config.directoryservice.provider == "activedirectory" else f"dc={',dc='.join(install_props.Config.directoryservice.openldap.name.split('.'))}".lower()}
 
@@ -715,7 +719,10 @@ class SOCAInstall(cdk.Stack):
         if not user_specified_variables.fs_data:
             self.soca_resources["scheduler_instance"].node.add_dependency(self.soca_resources["fs_data"])
 
-        ssh_user = "centos" if user_specified_variables.base_os == "centos7" else "ec2-user"
+        if user_specified_variables.china_region:
+            ssh_user = "ec2-user"
+        else:
+            ssh_user = "centos" if user_specified_variables.base_os == "centos7" else "ec2-user"
 
         if install_props.Config.entry_points_subnets.lower() == "public":
             # Associate the EIP to the scheduler instance
@@ -876,7 +883,7 @@ class SOCAInstall(cdk.Stack):
                                                   )
             if user_specified_variables.create_es_service_role:
                 service_linked_role = iam.CfnServiceLinkedRole(self, "ESServiceLinkedRole",
-                                                               aws_service_name=f"es.{core.Aws.URL_SUFFIX}",
+                                                               aws_service_name=f"es.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
                                                                description="Role for ES to access resources in the VPC")
                 self.soca_resources["es_domain"].node.add_dependency(service_linked_role)
 
@@ -1019,6 +1026,7 @@ if __name__ == "__main__":
         "vpc_cidr": app.node.try_get_context("vpc_cidr"),
         "create_es_service_role": False if app.node.try_get_context("create_es_service_role") == "False" else True,
         "vpc_azs": app.node.try_get_context("vpc_azs"),
+        "china_region": True if app.node.try_get_context("region") in ['cn-north-1', 'cn-northwest-1'] else False,
         "vpc_id": app.node.try_get_context("vpc_id"),
         "public_subnets": app.node.try_get_context("public_subnets") if app.node.try_get_context("public_subnets") is None else ast.literal_eval(base64.b64decode(app.node.try_get_context("public_subnets")).decode("utf-8")),
         "private_subnets": app.node.try_get_context("private_subnets") if app.node.try_get_context("private_subnets") is None else ast.literal_eval(base64.b64decode(app.node.try_get_context("private_subnets")).decode("utf-8")),
@@ -1051,16 +1059,16 @@ if __name__ == "__main__":
     }), object_hook=lambda d: SimpleNamespace(**d))
 
     # List of AWS endpoints & principals suffix
-    endpoints_suffix = {"fsx_lustre": f"fsx.{core.Aws.REGION}.{core.Aws.URL_SUFFIX}",
+    endpoints_suffix = {"fsx_lustre": f"fsx.{core.Aws.REGION}.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
                         "efs": f"efs.{core.Aws.REGION}.{core.Aws.URL_SUFFIX}"}
 
-    principals_suffix = {"backup": f"backup.{core.Aws.URL_SUFFIX}",
-                         "cloudwatch": f"cloudwatch.{core.Aws.URL_SUFFIX}",
+    principals_suffix = {"backup": f"backup.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
+                         "cloudwatch": f"cloudwatch.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
                          "ec2": f"ec2.{core.Aws.URL_SUFFIX}",
-                         "lambda": f"lambda.{core.Aws.URL_SUFFIX}",
-                         "sns": f"sns.{core.Aws.URL_SUFFIX}",
-                         "spotfleet": f"spotfleet.{core.Aws.URL_SUFFIX}",
-                         "ssm": f"ssm.{core.Aws.URL_SUFFIX}"}
+                         "lambda": f"lambda.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
+                         "sns": f"sns.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
+                         "spotfleet": f"spotfleet.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}",
+                         "ssm": f"ssm.{core.Aws.URL_SUFFIX if user_specified_variables.china_region is False else 'amazonaws.com'}"}
 
     # Apply default tag to all taggable resources
     core.Tags.of(app).add("soca:ClusterId", user_specified_variables.cluster_id)

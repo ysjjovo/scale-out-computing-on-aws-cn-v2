@@ -24,8 +24,10 @@ PYTHON=$(command -v python) # Change to custom Python3 if needed
 INSTALLER_DIRECTORY=$(dirname $(realpath "$0"))
 QUIET_MODE="false" # change to "false" for more log
 PYTHON_VENV="$INSTALLER_DIRECTORY/resources/src/envs/venv-py-installer" # Python Virtual Environment. It's not recommended to change the value
-NODEJS_BIN="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
+#NODEJS_BIN="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
+NODEJS_BIN="https://mylab-soca.s3.cn-northwest-1.amazonaws.com.cn/nvm-sh/nvm/v0.38.0/install.sh"
 export NVM_DIR="$INSTALLER_DIRECTORY/resources/src/envs/.nvm"
+export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node
 
 # shellcheck disable=SC2164
 cd "$INSTALLER_DIRECTORY"
@@ -62,11 +64,11 @@ if [[ -n $VIRTUAL_ENV ]]; then
     case $EXISTINGVIRTENV in
         yes )
           if [[ $QUIET_MODE = "true" ]]; then
-            pip3 install --upgrade pip --quiet
-            pip3 install -r resources/src/requirements.txt --quiet
+            pip3 install -i https://opentuna.cn/pypi/web/simple --upgrade pip --quiet
+            pip3 install -i https://opentuna.cn/pypi/web/simple -r resources/src/requirements.txt --quiet
           else
-            pip3 install --upgrade pip
-            pip3 install -r resources/src/requirements.txt
+            pip3 install -i https://opentuna.cn/pypi/web/simple --upgrade pip
+            pip3 install -i https://opentuna.cn/pypi/web/simple -r resources/src/requirements.txt
           fi
           ;;
         no ) exit 1;;
@@ -117,7 +119,7 @@ if [[ $? -ne 0 ]]; then
     while true; do
     read -rp "Do you want to automatically install aws cli and configure it? You will need to have a valid pair of access/secret key. You can generate them on the AWS Console IAM section (yes/no) " AWSCLIINSTALL
     case $AWSCLIINSTALL in
-        yes ) $PIP3 install awscli
+        yes ) $PIP3 install -i https://opentuna.cn/pypi/web/simple awscli
           echo "AWS CLI installed. Running 'aws configure' to configure your AWS CLI environment:"
           aws configure
           ;;

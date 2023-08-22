@@ -13,6 +13,9 @@ LDAP_PASSWORD="%%LDAP_PASSWORD%%"
 SOCA_AUTH_PROVIDER="%%SOCA_AUTH_PROVIDER%%"
 SOCA_LDAP_BASE="%%SOCA_LDAP_BASE%%"
 RESET_PASSWORD_DS_LAMBDA="%%RESET_PASSWORD_DS_LAMBDA%%"
+AWS_REGION="%%AWS_REGION%%"
+PIP_CHINA_MIRROR="%%PIP_CHINA_MIRROR%%"
+CENTOS_CHINA_REPO="%%CENTOS_CHINA_REPO%%"
 
 # Deactivate shell to make sure users won't access the cluster if it's not ready
 echo "
@@ -27,15 +30,31 @@ if [[ "$SOCA_BASE_OS" == "amazonlinux2" ]] || [[ "$SOCA_BASE_OS" == "rhel7" ]]; 
 fi
 
 if [[ "%%BASE_OS%%" == "centos7" ]]; then
+  if [[ "$AWS_REGION" == "cn-north-1" ]] || [[ "$AWS_REGION" == "cn-northwest-1" ]]; then
+    # Install SSM
+    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+    systemctl enable amazon-ssm-agent
+    systemctl restart amazon-ssm-agent
+    usermod --shell /usr/sbin/nologin ec2-user
+    curl -o /etc/yum.repos.d/CentOS-Base.repo $CENTOS_CHINA_REPO
+  else
     usermod --shell /usr/sbin/nologin centos
+  fi
 fi
 
 # Install awscli
 if [[ "$SOCA_BASE_OS" == "centos7" ]] || [[ "$SOCA_BASE_OS" == "rhel7" ]]; then
-  yum install -y python3-pip
-  PIP=$(which pip3)
-  $PIP install awscli
-  export PATH=$PATH:/usr/local/bin
+  if [[ "$AWS_REGION" == "cn-north-1" ]] || [[ "$AWS_REGION" == "cn-northwest-1" ]]; then
+    yum install -y python3-pip
+    PIP=$(which pip3)
+    $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+    export PATH=$PATH:/usr/local/bin
+  else
+    yum install -y python3-pip
+    PIP=$(which pip3)
+    $PIP install -i https://opentuna.cn/pypi/web/simple awscli
+    export PATH=$PATH:/usr/local/bin
+  fi
 fi
 
 # Disable automatic motd update if using ALI
@@ -75,9 +94,20 @@ $AWS ec2 create-tags --resources $ENI_IDS --region $AWS_REGION --tags Key=Name,V
 
 # Retrieve installer files from S3
 echo "@reboot $AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/SchedulerPostReboot.sh /root && /bin/bash /root/SchedulerPostReboot.sh $S3_BUCKET $CLUSTER_ID $LDAP_USERNAME '$LDAP_PASSWORD' >> /root/PostRebootConfig.log 2>&1" | crontab -
-$AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/config.cfg /root/
+if [[ "$AWS_REGION" == "cn-north-1" ]] || [[ "$AWS_REGION" == "cn-northwest-1" ]]; then
+  $AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/config_china.cfg /root/config.cfg
+else
+  $AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/config.cfg /root/
+fi
 $AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/requirements.txt /root/
 $AWS s3 cp s3://$S3_BUCKET/$CLUSTER_ID/scripts/Scheduler.sh /root/
+
+# Specify the AD DS lambda function we will use to reset AD Password
+if [[ "$SOCA_AUTH_PROVIDER" == "activedirectory" ]]; then
+  if [[ "$RESET_PASSWORD_DS_LAMBDA" != "false" ]]; then
+    echo "$RESET_PASSWORD_DS_LAMBDA" > /root/LambdaActiveDirectoryPasswordResetArn
+  fi
+fi
 
 # Prepare Scheduler setup
 /bin/bash /root/Scheduler.sh %%FS_DATA_PROVIDER%% %%FS_DATA_DNS%% %%FS_APPS_PROVIDER%% %%FS_APPS_DNS%% >> /root/Scheduler.sh.log 2>&1

@@ -228,20 +228,39 @@ class CreateLinuxDesktop(Resource):
 
             user_data = '''#!/bin/bash -x
             export PATH=$PATH:/usr/local/bin
+            if [[ "''' + base_os + '''" == "centos7" ]];
+            then
+                if [[ "$region" == "cn-north-1" ]] || [[ "$region" == "cn-northwest-1" ]];
+                then
+                    curl -o /etc/yum.repos.d/CentOS-Base.repo ''' + config.Config.CENTOS_CHINA_REPO + '''
+                fi
+            fi
+
             if [[ "''' + base_os + '''" == "centos7" ]] || [[ "''' + base_os + '''" == "rhel7" ]];
             then
+                if [[ "$region" == "cn-north-1" ]] || [[ "$region" == "cn-northwest-1" ]];
+                then
                     yum install -y python3-pip
                     PIP=$(which pip3)
-                    $PIP install awscli
+                    $PIP install -i ''' + config.Config.PIP_CHINA_MIRROR + ''' awscli
                     yum install -y nfs-utils # enforce install of nfs-utils
+                else
+                    yum install -y python3-pip
+                    PIP=$(which pip3)
+                    $PIP install -i ''' + config.Config.PIP_CHINA_MIRROR + ''' awscli
+                    yum install -y nfs-utils # enforce install of nfs-utils
+                fi
             else
-                 yum install -y python3-pip
-                 PIP=$(which pip3)
-                 $PIP install awscli
-            fi
-            if [[ "''' + base_os + '''" == "amazonlinux2" ]];
+                if [[ "$region" == "cn-north-1" ]] || [[ "$region" == "cn-northwest-1" ]];
                 then
-                    /usr/sbin/update-motd --disable
+                    yum install -y python3-pip
+                    PIP=$(which pip3)
+                    $PIP install -i ''' + config.Config.PIP_CHINA_MIRROR + ''' awscli
+                else
+                    yum install -y python3-pip
+                    PIP=$(which pip3)
+                    $PIP install -i ''' + config.Config.PIP_CHINA_MIRROR + ''' awscli
+                fi
             fi
     
             GET_INSTANCE_TYPE=$(curl http://169.254.169.254/latest/meta-data/instance-type)
