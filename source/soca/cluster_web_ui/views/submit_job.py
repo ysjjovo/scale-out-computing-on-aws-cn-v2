@@ -35,7 +35,7 @@ def index():
     input_file = request.args.get("input_file", None)
     if input_file is None or input_file == "":
         # User must specify input first
-        flash("What input file do you want to use? <hr> Navigate to the folder where your input file is located then click 'Use as Simulation Input' icon: <i class='fas fa-microchip fa-lg'  style='color: grey'></i>","info")
+        flash("您要使用什么输入文件? <hr> 导航至输入文件所在的文件夹，然后单击‘用作模拟输入’图标: <i class='fas fa-microchip fa-lg'  style='color: grey'></i>","info")
         return redirect("/my_files")
 
     application_profiles = {}
@@ -46,6 +46,7 @@ def index():
 
     return render_template('submit_job.html',
                            user=session["user"],
+                           sudoers=session['sudoers'],
                            application_profiles=OrderedDict(sorted(application_profiles.items(), key=lambda x: x[1]['profile_name'].lower())),
                            input_file=False if input_file is None else input_file)
 

@@ -67,6 +67,10 @@ class StopDesktop(Resource):
 
         args = parser.parse_args()
         user = request.headers.get("X-SOCA-USER")
+        owner = request.headers.get("X-SOCA-OWNER")
+        if owner:
+            user = owner
+        logger.info('user: ' + user)
         if session_number is None:
             return errors.all_errors('CLIENT_MISSING_PARAMETER', "session_number not found in URL. Endpoint is /api/dcv/desktop/<session_number>/<action>")
         else:

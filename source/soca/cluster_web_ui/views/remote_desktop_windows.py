@@ -129,13 +129,21 @@ def index():
         user_sessions = get_desktops.json()["message"]
         user_sessions = {int(k): v for k, v in
                          user_sessions.items()}  # convert all keys (session number) back to integer
+        other_sessions = get_desktops.json()["other"] if session["sudoers"] else []
     else:
         flash(f"{get_desktops.json()}", "error")
         user_sessions = {}
+        other_sessions = []
 
-    max_number_of_sessions = config.Config.DCV_WINDOWS_SESSION_COUNT
+    max_number_of_sessions = config.get_dvc_windows_session_count(session["user"])
     # List of instances not available for DCV. Adjust as needed
-    blocked_instances = config.Config.DCV_RESTRICTED_INSTANCE_TYPE
+    blocked_instances = config.get_dcv_restricted_instance_type(session["user"])
+    quick2d = True
+    if 'quick2d' in blocked_instances:
+        quick2d = False
+    quick3d = True
+    if 'quick3d' in blocked_instances:
+        quick3d = False
     all_instances_available = client_ec2._service_model.shape_for('InstanceType').enum
     all_instances = [p for p in all_instances_available if not any(substr in p for substr in blocked_instances)]
     try:
@@ -148,6 +156,7 @@ def index():
 
     return render_template('remote_desktop_windows.html',
                            user=session["user"],
+                           sudoers=session['sudoers'],
                            user_sessions=user_sessions,
                            hibernate_idle_session=config.Config.DCV_WINDOWS_HIBERNATE_IDLE_SESSION,
                            stop_idle_session=config.Config.DCV_WINDOWS_STOP_IDLE_SESSION,
@@ -161,7 +170,10 @@ def index():
                            max_number_of_sessions=max_number_of_sessions,
                            auth_provider=config.Config.SOCA_AUTH_PROVIDER,
                            netbios="false" if config.Config.SOCA_AUTH_PROVIDER == "openldap" else config.Config.NETBIOS,
-                           ami_list=get_ami_info())
+                           ami_list=get_ami_info(),
+                           quick2d=quick2d,
+                           quick3d=quick3d,
+                           other_dcv_sessions=other_sessions)
 
 
 @remote_desktop_windows.route('/remote_desktop_windows/create', methods=['POST'])
@@ -178,7 +190,7 @@ def create():
                                 "hibernate": request.form["hibernate"]},
                           verify=False)  # nosec
     if create_desktop.status_code == 200:
-        flash("Your session has been initiated. It will be ready within 20 minutes.", "success")
+        flash("您的桌面已启动。将在20分钟内准备好。", "success")
     else:
         flash(f"{create_desktop.json()['message']} ", "error")
 
@@ -190,26 +202,30 @@ def create():
 def delete():
     session_number = request.args.get("session", None)
     action = request.args.get("action", None)
+    owner = request.args.get("owner", None)
     logger.info(f"Received following parameters {request.args} to delete DCV Windows")
+    headers = {"X-SOCA-USER": session["user"], "X-SOCA-TOKEN": session["api_key"]}
+    if session["sudoers"]:
+        headers["X-SOCA-OWNER"] = owner
     if action == "delete":
         # Terminate a desktop
         delete_desktop = delete(f"{config.Config.FLASK_ENDPOINT}/api/dcv/desktop/{session_number}/delete",
-                             headers={"X-SOCA-USER": session["user"], "X-SOCA-TOKEN": session["api_key"]},
+                             headers=headers,
                              data={"os": "windows"},
                              verify=False)  # nosec
 
     else:
         # Stop/Hibernate
         delete_desktop = put(f"{config.Config.FLASK_ENDPOINT}/api/dcv/desktop/{session_number}/{action}",
-                              headers={"X-SOCA-USER": session["user"], "X-SOCA-TOKEN": session["api_key"]},
+                              headers=headers,
                               data={"os": "windows",
                                     "action": action},
                               verify=False)  # nosec
     if delete_desktop.status_code == 200:
         if action == "terminate":
-            flash(f"Your desktop is about to be terminated", "success")
+            flash(f"您的桌面即将终止", "success")
         else:
-            flash(f"Your desktop is about to be changed to {action} state", "success")
+            flash(f"您的桌面即将变为 {action} 状态", "success")
     else:
         flash(f"{delete_desktop.json()['message']} ", "error")
 

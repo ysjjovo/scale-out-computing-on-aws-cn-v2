@@ -10,15 +10,59 @@
 #  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
 #  and limitations under the License.                                                                                #
 ######################################################################################################################
+import datetime
+import os
+import json
 import logging
 import config
 import cognito_auth
+import boto3
+from botocore import config as botocore_config
 from decorators import login_required
 from flask import render_template, request, redirect, session, flash, Blueprint, current_app
+from requests_aws4auth import AWS4Auth
 from requests import post, get
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+
 
 logger = logging.getLogger("application")
 index = Blueprint('index', __name__, template_folder='templates')
+SOCA_USER_INDEX_MAPPING = {
+    "mappings": {
+        "properties": {
+            "user": {"type": "keyword"},
+            "loginTime": {"type": "date"},
+            "sudoers": {"type": "boolean"}
+        }
+    }
+}
+
+
+def boto_extra_config():
+    aws_solution_user_agent = {"user_agent_extra": "AwsSolution/SO0072/2.7.2"}
+    return botocore_config.Config(**aws_solution_user_agent)
+
+
+def get_soca_configuration():
+    secretsmanager_client = boto3.client('secretsmanager',config=boto_extra_config())
+    configuration_secret_name = os.environ['SOCA_CONFIGURATION']
+    response = secretsmanager_client.get_secret_value(SecretId=configuration_secret_name)
+    return json.loads(response['SecretString'])
+
+
+soca_configuration = get_soca_configuration()
+es_endpoint = 'https://' + soca_configuration['ESDomainEndpoint']
+users_es_index_name = "soca_users"
+
+
+def get_es_client():
+    boto3_session = boto3.Session()
+    credentials = boto3_session.get_credentials()
+    awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, boto3_session.region_name, 'es',
+                       session_token=credentials.token)
+    es = Elasticsearch([es_endpoint], port=443, http_auth=awsauth, use_ssl=True, verify_certs=True,
+                       connection_class=RequestsHttpConnection)
+    return es
 
 
 @index.route('/ping', methods=['GET'])
@@ -47,8 +91,12 @@ def login():
 @login_required
 def logout():
     session_data = ["user", "sudoers", "api_key"]
+    user = session['user']
     for param in session_data:
         session.pop(param, None)
+    # 退出登录，es 删除数据
+    # es = get_es_client()
+    # es.delete_by_query(index=users_es_index_name, body={'query': {'bool': {'must': {'term': {'user': user}}}}}),
     return redirect('/')
 
 
@@ -84,6 +132,13 @@ def authenticate():
             else:
                 session["sudoers"] = False
 
+            # 登录成功，往 es 写数据
+            # doc_type = "item"
+            # es = get_es_client()
+            # add = es.index(index=users_es_index_name, doc_type=doc_type, body={'user': user,
+            #                                                                    'loginTime': datetime.datetime.now(),
+            #                                                                    'sudoers': session["sudoers"]})
+            # logger.info("success add user " + user + " to es : " + json.dumps(add))
             if redirect_path is not None:
                 return redirect(redirect_path)
             else:
