@@ -82,7 +82,7 @@ class ModifyDesktop(Resource):
         if args["os"].lower() not in ["linux", "windows"]:
             return errors.all_errors('CLIENT_MISSING_PARAMETER', "os must be linux or windows")
 
-        blocked_instances = config.Config.DCV_RESTRICTED_INSTANCE_TYPE
+        blocked_instances = config.get_dcv_restricted_instance_type(user)
         all_instances_available = client_ec2._service_model.shape_for('InstanceType').enum
         all_instances = [p for p in all_instances_available if not any(substr in p for substr in blocked_instances)]
         if args["instance_type"].lower() not in all_instances:

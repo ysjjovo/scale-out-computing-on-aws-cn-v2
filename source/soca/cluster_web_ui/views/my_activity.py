@@ -55,15 +55,22 @@ def index():
     else:
         flash("Unable to query Elastic Search indices. Make sure this host has permission to query: {}".format(job_index), "error")
 
+    user_kibana_url = "https://" + loadbalancer_dns_name + "/_plugin/kibana/"
     if index_id is False:
-        flash("Unable to retrieve index ID for {}. To do the initial setup, follow instructions available on <a href='https://awslabs.github.io/scale-out-computing-on-aws/analytics/monitor-cluster-activity/' target='_blank'>https://awslabs.github.io/scale-out-computing-on-aws/analytics/monitor-cluster-activity/</a>".format(config.Config.KIBANA_JOB_INDEX))
-        user_kibana_url = "https://" + loadbalancer_dns_name + "/_plugin/kibana/"
+        flash("无法获得索引 ID {}。初始化设置请查看以下指引 <a href='https://awslabs.github.io/scale-out-computing-on-aws/analytics/monitor-cluster-activity/' target='_blank'>https://awslabs.github.io/scale-out-computing-on-aws/analytics/monitor-cluster-activity/</a>".format(config.Config.KIBANA_JOB_INDEX))
     else:
-        user_kibana_url = "https://"+loadbalancer_dns_name+"/_plugin/kibana/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'"+start+"T00:00:00.000Z',to:'"+end+"T23:59:59.000Z'))&_a=(columns:!(_source),filters:!(),index:'"+index_id+"',interval:auto,query:(language:kuery,query:'user:"+user+"'),sort:!(!(start_iso,desc)))"
+        if user == 'designer1':
+            job_dashboard_key = config.Config.DESIGN_1_JOB_DASHBOARD
+        elif user == 'designer2':
+            job_dashboard_key = config.Config.DESIGN_2_JOB_DASHBOARD
+        else:
+            job_dashboard_key = config.Config.JOB_DASHBOARD
+        user_kibana_url = user_kibana_url + job_dashboard_key
 
     return render_template('my_activity.html',
                            user_kibana_url=user_kibana_url,
                            user=user,
+                           sudoers=session['sudoers'],
                            start=start,
                            client_ip=request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr),
                            end=end)

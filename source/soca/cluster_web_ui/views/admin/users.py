@@ -40,7 +40,9 @@ def index():
     except Exception as err:
         logger.error("Unable to retrieve shells installed on the system")
         all_shells = ["/bin/bash"]
-    return render_template('admin/users.html', user=session['user'],
+    return render_template('admin/users.html',
+                           user=session['user'],
+                           sudoers=session['sudoers'],
                            all_users=sorted(all_users),
                            all_shells=all_shells,
                            directory=os.environ.get("SOCA_AUTH_PROVIDER"))

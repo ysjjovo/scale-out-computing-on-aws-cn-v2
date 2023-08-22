@@ -287,6 +287,7 @@ def index():
         get_all_uid = [file_info['uid'] for file_info in filesystem.values() if file_info["type"] == "file"]
 
         return render_template('my_files.html', user=session["user"],
+                               sudoers=session['sudoers'],
                                filesystem=OrderedDict(sorted(filesystem.items(), key=lambda t: t[0].lower())),
                                get_all_uid=base64.b64encode(",".join(get_all_uid).encode()).decode(),
                                get_all_uid_count=len(get_all_uid),

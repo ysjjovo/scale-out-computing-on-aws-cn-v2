@@ -60,7 +60,19 @@ class Sudo(Resource):
             conn.protocol_version = 3
             conn.set_option(ldap.OPT_REFERRALS, 0)
             conn.simple_bind_s(f"{config.Config.ROOT_USER}@{config.Config.DOMAIN_NAME}", config.Config.ROOT_PW)
-            user_search_base = f"CN={user},OU=Users,OU={config.Config.NETBIOS},{config.Config.LDAP_BASE}"
+
+            # Custom AD support
+            user_search_base = f"{config.Config.LDAP_BASE}"
+            user_search_scope = ldap.SCOPE_SUBTREE
+            user_filter = f"(&(objectClass=user)(sAMAccountName={user}))"
+            check_user = conn.search_s(user_search_base, user_search_scope, user_filter)
+            if check_user.__len__() == 0:
+                return {'success': False, 'message': "User does not have SUDO permissions."}, 222
+            else:
+                user_search_base = check_user[0][0]
+
+            # user_search_base = f"CN={user},OU=Users,OU={config.Config.NETBIOS},{config.Config.LDAP_BASE}"
+
             sudoers_group = config.Config.SUDOERS_GROUP
             filter_criteria = f"(&(objectClass=group)(member={user_search_base}))"
             for dn, entry in conn.search_s(config.Config.LDAP_BASE, ldap.SCOPE_SUBTREE, filter_criteria, ["cn", "member"]):

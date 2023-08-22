@@ -139,7 +139,7 @@ class ListDesktops(Resource):
         # Retrieve sessions
         is_active = True if args["is_active"].lower() == "true" else False
         if args["os"].lower() == "windows":
-            all_dcv_sessions = WindowsDCVSessions.query.filter(WindowsDCVSessions.user == user)
+            all_dcv_sessions = WindowsDCVSessions.query
 
             if args["state"] is not None:
                 all_dcv_sessions = all_dcv_sessions.filter(WindowsDCVSessions.session_state == args["state"])
@@ -148,7 +148,7 @@ class ListDesktops(Resource):
             all_dcv_sessions = all_dcv_sessions.filter(WindowsDCVSessions.is_active==is_active)
 
         else:
-            all_dcv_sessions = LinuxDCVSessions.query.filter(LinuxDCVSessions.user == user)
+            all_dcv_sessions = LinuxDCVSessions.query
             if args["state"] is not None:
                 all_dcv_sessions = all_dcv_sessions.filter(LinuxDCVSessions.session_state == args["state"])
             if args["session_number"] is not None:
@@ -157,6 +157,7 @@ class ListDesktops(Resource):
 
         logger.info(f"Checking {args['os']} desktops for {user}")
         user_sessions = {}
+        other_sessions = []
         for session_info in all_dcv_sessions.all():
             try:
                 session_number = session_info.session_number
@@ -253,29 +254,44 @@ class ListDesktops(Resource):
                     if check_dcv_state.status_code == 200:
                         session_info.session_state = "running"
                         db.session.commit()
-
-                user_sessions[session_number] = {
-                        "url": f"https://{read_secretmanager.get_soca_configuration()['LoadBalancerDNSName']}/{session_host_private_dns}/",
-                        "session_local_admin_password": session_local_admin_password,
-                        "session_state": session_state,
-                        "session_authentication_token": dcv_authentication_token,
-                        "session_id": session_id,
-                        "session_name": session_name,
-                        "session_instance_id": session_instance_id,
-                        "session_instance_type": session_instance_type,
-                        "tag_uuid": tag_uuid,
-                        "support_hibernation": support_hibernation,
-                        "session_schedule": session_schedule,
-                        "connection_string": f"https://{read_secretmanager.get_soca_configuration()['LoadBalancerDNSName']}/{session_host_private_dns}/?authToken={dcv_authentication_token}#{session_id}"}
-
-                #logger.info(user_sessions)
+                session_object = {
+                    "url": f"https://{read_secretmanager.get_soca_configuration()['LoadBalancerDNSName']}/{session_host_private_dns}/",
+                    "session_local_admin_password": session_local_admin_password,
+                    "session_state": session_state,
+                    "session_state_cn": self.translate(session_state),
+                    "session_authentication_token": dcv_authentication_token,
+                    "session_id": session_id,
+                    "session_user": session_info.user,
+                    "session_name": session_name,
+                    "session_number": session_number,
+                    "session_instance_id": session_instance_id,
+                    "session_instance_type": session_instance_type,
+                    "session_created_on": session_info.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+                    "tag_uuid": tag_uuid,
+                    "support_hibernation": support_hibernation,
+                    "session_schedule": session_schedule,
+                    "connection_string": f"https://{read_secretmanager.get_soca_configuration()['LoadBalancerDNSName']}/{session_host_private_dns}/?authToken={dcv_authentication_token}#{session_id}"}
+                if session_info.user == user:
+                    user_sessions[session_number] = session_object
+                elif session_info.is_active:
+                    other_sessions.append(session_object)
             except Exception as err:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 logger.error(exc_type, fname, exc_tb.tb_lineno)
                 return errors.all_errors(type(err).__name__, err)
+        return {"success": True, "message": user_sessions, "other": other_sessions}, 200
 
-        return {"success": True, "message": user_sessions}, 200
-
+    def translate(self, session_state):
+        if session_state == "pending":
+            return "启动中"
+        elif session_state == "running":
+            return "运行中"
+        elif session_state == "stopped":
+            return "已停止"
+        elif session_state == "stopping":
+            return "停止中"
+        else:
+            return "已关闭"
 
 

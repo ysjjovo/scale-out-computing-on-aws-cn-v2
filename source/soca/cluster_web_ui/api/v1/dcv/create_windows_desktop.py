@@ -186,8 +186,9 @@ class CreateWindowsDesktop(Resource):
                 return errors.all_errors("DCV_LAUNCH_ERROR", f"disk_size must be an integer")
 
             try:
-                if int(args["session_number"]) > int(config.Config.DCV_WINDOWS_SESSION_COUNT):
-                    return errors.all_errors("DCV_LAUNCH_ERROR", f"session_number {args['session_number']} is greater than the max number of session allowed ({config.Config.DCV_WINDOWS_SESSION_COUNT}). Contact admin for increase.")
+                dvc_windows_session_count = int(config.get_dvc_windows_session_count(user))
+                if int(args["session_number"]) > dvc_windows_session_count:
+                    return errors.all_errors("DCV_LAUNCH_ERROR", f"session_number {args['session_number']} is greater than the max number of session allowed ({dvc_windows_session_count}). Contact admin for increase.")
             except Exception as err:
                 return errors.all_errors("DCV_LAUNCH_ERROR", f"Session Number {args['session_number']} must be a number. Err: {err}")
 

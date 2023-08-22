@@ -14,7 +14,7 @@
 import logging
 import config
 from decorators import login_required
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 import read_secretmanager
 
 logger = logging.getLogger("application")
@@ -26,4 +26,15 @@ dashboard = Blueprint('dashboard', __name__, template_folder='templates')
 def index():
     loadbalancer_dns_name = read_secretmanager.get_soca_configuration()['LoadBalancerDNSName']
     kibana_url = "https://" + loadbalancer_dns_name + "/_plugin/kibana/"
-    return render_template("dashboard.html", kibana_url=kibana_url)
+    user = session['user']
+    if user == 'designer1':
+        dashboard_key = config.Config.DESIGN_1_KIBANA_DASHBOARD
+    elif user == 'designer2':
+        dashboard_key = config.Config.DESIGN_2_KIBANA_DASHBOARD
+    else:
+        dashboard_key = config.Config.KIBANA_DASHBOARD
+    return render_template("dashboard.html",
+                           user=session["user"],
+                           sudoers=session['sudoers'],
+                           kibana_url=kibana_url,
+                           dashboard_key=dashboard_key)

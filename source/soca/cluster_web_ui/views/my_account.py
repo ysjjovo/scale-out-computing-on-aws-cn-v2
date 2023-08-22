@@ -48,6 +48,7 @@ def index():
 
     return render_template("my_account.html",
                            user=session["user"],
+                           sudoers=session['sudoers'],
                            group_members=group_members,
                            all_users=all_users)
 

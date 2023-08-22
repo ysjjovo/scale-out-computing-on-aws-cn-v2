@@ -12,6 +12,8 @@
 ######################################################################################################################
 
 import os
+import ldap
+import re
 from datetime import timedelta
 import secrets
 from cryptography.fernet import Fernet
@@ -19,6 +21,59 @@ from botocore import config as botocore_config
 import read_secretmanager
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+def get_group_members(group):
+    group_search_base = "ou=Group," + Config.LDAP_BASE_DN
+    group_search_scope = ldap.SCOPE_SUBTREE
+    group_filter = 'cn=' + group
+    conn = ldap.initialize('ldap://' + Config.LDAP_HOST)
+    groups = conn.search_s(group_search_base, group_search_scope, group_filter, ["cn", "memberUid"])
+    if groups.__len__() == 0:
+        return []
+
+    members = []
+    for group in groups:
+        if "memberUid" in group[1].keys():
+            for member in group[1]["memberUid"]:
+                user = re.match("uid=(\w+),", member.decode("utf-8"))
+                if user:
+                    members.append(user.group(1))
+                else:
+                    members.append(member.decode("utf-8"))
+    return members
+
+def get_dvc_linux_session_count(user):
+    # members = get_group_members('kongtiao')
+    # if user in members:
+    #     return Config.DESIGN_GROUP_1_DCV_LINUX_SESSION_COUNT
+    # else:
+    #     members = get_group_members('bingxiang')
+    #     if user in members:
+    #         return Config.DESIGN_GROUP_2_DCV_LINUX_SESSION_COUNT
+    #     else:
+    return Config.DCV_LINUX_SESSION_COUNT
+
+def get_dvc_windows_session_count(user):
+    # members = get_group_members('kongtiao')
+    # if user in members:
+    #     return Config.DESIGN_GROUP_1_DCV_WINDOWS_SESSION_COUNT
+    # else:
+    #     members = get_group_members('bingxiang')
+    #     if user in members:
+    #         return Config.DESIGN_GROUP_2_DCV_WINDOWS_SESSION_COUNT
+    #     else:
+    return Config.DCV_WINDOWS_SESSION_COUNT
+
+def get_dcv_restricted_instance_type(user):
+    # members = get_group_members('kongtiao')
+    # if user in members:
+    #     return Config.DESIGN_GROUP_1_DCV_RESTRICTED_INSTANCE_TYPE
+    # else:
+    #     members = get_group_members('bingxiang')
+    #     if user in members:
+    #         return Config.DESIGN_GROUP_2_DCV_RESTRICTED_INSTANCE_TYPE
+    #     else:
+    return Config.DCV_RESTRICTED_INSTANCE_TYPE
 
 
 def boto_extra_config():
@@ -55,7 +110,13 @@ class Config(object):
     MAX_SIZE_ONLINE_PREVIEW = 150000000  # in bytes (150mb by default), maximum size of file that can be visualized via the web editor
     MAX_ARCHIVE_SIZE = 150000000  # in bytes (150mb by default), maximum size of archive generated when downloading multiple files at once
     DAILY_BACKUP_COUNT = 15  # Keep 15 latest daily backups
-    KIBANA_JOB_INDEX = "soca-jobs*"  # Default index to look for /my_activity. Change it something more specific if using more than 1 index with name ~ "job*"
+    KIBANA_JOB_INDEX = "soca_deadline_jobs*"  # Default index to look for /my_activity. Change it something more specific if using more than 1 index with name ~ "job*"
+    KIBANA_DASHBOARD = 'app/dashboards#/view/11ac9bb0-746f-11ed-831c-8970e2ea3562?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))'
+    DESIGN_1_KIBANA_DASHBOARD = 'app/dashboards#/view/813900b0-7530-11ed-831c-8970e2ea3562?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))&hide-filter-bar=true'
+    DESIGN_2_KIBANA_DASHBOARD = 'app/dashboards#/view/c9a3eb70-75ef-11ed-8d09-613cac784998?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))&hide-filter-bar=true'
+    JOB_DASHBOARD = 'app/dashboards#/view/e0575a70-75f2-11ed-831c-8970e2ea3562?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))&show-time-filter=true'
+    DESIGN_1_JOB_DASHBOARD = 'app/dashboards#/view/760376a0-75f1-11ed-831c-8970e2ea3562?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))&show-time-filter=true&hide-filter-bar=true'
+    DESIGN_2_JOB_DASHBOARD = 'app/dashboards#/view/2724ec20-75f2-11ed-8d09-613cac784998?embed=true&_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow))&show-time-filter=true&hide-filter-bar=true'
 
     # UWSGI SETTINGS
     FLASK_HOST = "127.0.0.1"
@@ -80,10 +141,14 @@ class Config(object):
     DCV_FORCE_INSTANCE_HIBERNATE_SUPPORT = False  # If True, users can only provision instances that support hibernation
     DCV_TOKEN_SYMMETRIC_KEY = os.environ["SOCA_DCV_TOKEN_SYMMETRIC_KEY"]  # used to encrypt/decrypt and validate DCV session auth
     DCV_RESTRICTED_INSTANCE_TYPE = ['metal', 'nano', 'micro', 'p3', 'p2', 'p3dn', 'g2']  # This instance type won't be visible on the dropdown menu
+    DESIGN_GROUP_1_DCV_RESTRICTED_INSTANCE_TYPE = ['metal', 'nano', 'micro', 'p3', 'p2', 'p3dn', 'g2', 'quick2d', 't', 'm', 'r5', 'r4', 'r3', 'c', 'r6', 'x1', 'i2', 'i3']  # This instance type won't be visible on the dropdown menu
+    DESIGN_GROUP_2_DCV_RESTRICTED_INSTANCE_TYPE = ['metal', 'nano', 'micro', 'p3', 'p2', 'p3dn', 'g2', 'quick3d', 'g4']  # This instance type won't be visible on the dropdown menu
     DCV_IDLE_CPU_THRESHOLD = 15  # SOCA will NOT hibernate/stop an instance if current CPU usage % is over this value
 
     # DCV Linux
     DCV_LINUX_SESSION_COUNT = 4
+    DESIGN_GROUP_1_DCV_LINUX_SESSION_COUNT = 1
+    DESIGN_GROUP_2_DCV_LINUX_SESSION_COUNT = 2
     DCV_LINUX_ALLOW_INSTANCE_CHANGE = True  # Allow user to change their instance type if their DCV session is stopped
     DCV_LINUX_HIBERNATE_IDLE_SESSION = 1  # In hours. Linux DCV sessions will be hibernated to save cost if there is no active connection within the time specified. 0 to disable
     DCV_LINUX_STOP_IDLE_SESSION = 1  # In hours. Linux DCV sessions will be stopped to save cost if there is no active connection within the time specified. 0 to disable
@@ -102,6 +167,8 @@ class Config(object):
 
     # DCV Windows
     DCV_WINDOWS_SESSION_COUNT = 4
+    DESIGN_GROUP_1_DCV_WINDOWS_SESSION_COUNT = 1
+    DESIGN_GROUP_2_DCV_WINDOWS_SESSION_COUNT = 2
     DCV_WINDOWS_ALLOW_INSTANCE_CHANGE = True  # Allow user to change their instance type if their DCV session is stopped
     DCV_WINDOWS_HIBERNATE_IDLE_SESSION = 1  # In hours. Windows DCV sessions will be hibernated to save cost if there is no active connection within the time specified. 0 to disable
     DCV_WINDOWS_STOP_IDLE_SESSION = 1  # In hours. Windows DCV sessions will be stopped to save cost if there is no active connection within the time specified. 0 to disable

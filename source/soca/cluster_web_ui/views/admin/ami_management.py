@@ -41,7 +41,9 @@ def index():
         flash(f"{list_images.json()['message']} ", "error")
         ami_infos = {}
 
-    return render_template('admin/ami_management.html', user=session["user"], ami_infos=ami_infos, region_name=get_region())
+    return render_template('admin/ami_management.html', user=session["user"],
+                           sudoers=session['sudoers'],
+                           ami_infos=ami_infos, region_name=get_region())
 
 
 @admin_ami_management.route('/admin/ami_management/create', methods=['POST'])
