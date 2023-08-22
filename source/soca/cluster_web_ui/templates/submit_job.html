@@ -41,12 +41,12 @@
                       <div class="card shadow mb-6">
                           <div class="card-body">
                               <form id="search-application">
-                                <input class="form-control" type="text" placeholder="What software do you want to run?" aria-label="Search">
+                                <input class="form-control" type="text" placeholder="您想运行什么软件?" aria-label="Search">
                               </form>
                               <hr>
                           <div class="row">
                           {% if not application_profiles %}
-                              No applications found. <a href="/admin/applications">Create one first.</a>
+                              未找到任何应用程序。 <a href="/admin/applications">请先创建一个应用程序。</a>
                           {% else %}
                                   {% for app_id, app_data in application_profiles.items() %}
                                       <div name="application-card" id="{{ application }}" class="col-md-auto" style="margin-top: 5px">

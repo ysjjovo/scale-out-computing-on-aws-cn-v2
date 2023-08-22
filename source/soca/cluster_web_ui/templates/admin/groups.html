@@ -36,10 +36,10 @@
                   <nav>
                      <nav>
                       <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">Create a group</a>
-                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-delete" aria-selected="false">Delete a group</a>
-                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-check" role="tab" aria-controls="nav-contact" aria-selected="false">Check group membership</a>
-                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-update" role="tab" aria-controls="nav-contact" aria-selected="false">Change group membership</a>
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">创建群组</a>
+                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-delete" aria-selected="false">删除群组</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-check" role="tab" aria-controls="nav-contact" aria-selected="false">检查群组资格</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-update" role="tab" aria-controls="nav-contact" aria-selected="false">修改群组资格</a>
 
                       </div>
                      </nav>
@@ -48,14 +48,14 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Create a new group</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">创建新群组</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/create_group" method="post">
                                       <div class="form-group">
-                                          <input id="group_name" placeholder="Group name" class="form-control" type="text" required name="group_name">
+                                          <input id="group_name" placeholder="群组名称" class="form-control" type="text" required name="group_name">
                                       </div>
-                                      Members: (choose all that apply) <br>
+                                      成员: （选择所有适用的选项） <br>
                                       <select class="form-control" id="members" size="15" name="members" multiple>
                                            {% for user in all_users %}
                                             <option value="{{user}}">{{user}}</option>
@@ -65,7 +65,7 @@
                                       <br>
                                       <div align="center">
                                            <input type="hidden"  name="csrf_token" value="{{ csrf_token() }}">
-                                          <button type="submit" class="btn btn-primary btn-lg">Create Group</button>
+                                          <button type="submit" class="btn btn-primary btn-lg">创建群组</button>
                                       </div>
                                   </form>
                               </div>
@@ -76,12 +76,12 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Delete Group</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">删除群组</h6>
                               </div>
                               <div class="card-body">
                                   <div class="alert alert-primary" role="alert">
-                                      <strong>Important </strong>
-                                      Deleting group may cause access issue. Make sure your group is no longer in use before deleting it
+                                      <strong>重要 </strong>
+                                      删除群组可能会导致访问问题。在删除群组之前，请确保您的群不再使用
                                   </div>
 
                                   <form action="/admin/delete_group" method="post">
@@ -95,11 +95,11 @@
                                   </div>
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="verif" id="verif" required>
-                                          <label class="form-check-label" for="verif">I am sure I want to delete this group</label>
+                                          <label class="form-check-label" for="verif">我确认删除这个群组</label>
                                       </div>
                                       <div align="center">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                          <button type="submit" class="btn btn-danger btn-lg">Delete group</button>
+                                          <button type="submit" class="btn btn-danger btn-lg">删除群组</button>
                                       </div>
                                   </form>
                               </div>
@@ -110,7 +110,7 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Check group membership</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">检查群组资格</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/check_group" method="post">
@@ -124,7 +124,7 @@
                                   </div>
                                       <div align="center">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                          <button type="submit" class="btn btn-primary btn-lg">Check group</button>
+                                          <button type="submit" class="btn btn-primary btn-lg">检查群组</button>
                                       </div>
                                   </form>
                               </div>
@@ -137,12 +137,12 @@
                     <div class="col-md-6">
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Add to group</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">添加用户到群组</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/manage_group" method="post">
                                       <div class="form-group">
-                                      Select user:
+                                      选择用户:
                                     <select class="form-control" id="user" name="user">
                                         {% for user in all_users %}
                                             <option value="{{user}}">{{user}}</option>
@@ -150,7 +150,7 @@
                                     </select>
                                   </div>
                                   <div class="form-group">
-                                  Select group:
+                                  选择群组:
                                       <select class="form-control" id="group" name="group">
                                         {% for group in all_groups %}
                                             <option value="{{group}}">{{group}}</option>
@@ -160,13 +160,13 @@
                                   </div>
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="admin_verif" id="admin_reset_verif" required>
-                                           <label class="form-check-label" for="admin_verif">I am sure I want to <strong>ADD</strong> this user to the group</label>
+                                           <label class="form-check-label" for="admin_verif">我确认要 <strong>添加</strong> 这个用户到群组</label>
                                       </div>
                                       <div align="center">
                                           <input type="hidden" name="action" value="add">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                           <button type="submit" class="btn btn-success btn-lg">Add user</button>
+                                           <button type="submit" class="btn btn-success btn-lg">添加用户</button>
                                       </div>
                                   </form>
                               </div>
@@ -175,12 +175,12 @@
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Remove from group</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">从群组移除用户</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/manage_group" method="post">
                                       <div class="form-group">
-                                      Select user:
+                                      选择用户:
                                     <select class="form-control" id="user" name="user">
                                         {% for user in all_users %}
                                             <option value="{{user}}">{{user}}</option>
@@ -188,7 +188,7 @@
                                     </select>
                                   </div>
                                   <div class="form-group">
-                                  Select group:
+                                  选择群组:
                                       <select class="form-control" id="group" name="group">
                                         {% for group in all_groups %}
                                             <option value="{{group}}">{{group}}</option>
@@ -199,13 +199,13 @@
 
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="sudo_revoke_verif" id="sudo_revoke_verif" required>
-                                           <label class="form-check-label" for="sudo_revoke_verif">I am sure I want to <strong>REMOVE</strong> this user from the group</label>
+                                           <label class="form-check-label" for="sudo_revoke_verif">我确认从群组中 <strong>移除</strong> 这个用户</label>
                                       </div>
                                       <div align="center">
                                           <input type="hidden" name="action" value="remove">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                           <button type="submit" class="btn btn-danger btn-lg">Remove user</button>
+                                           <button type="submit" class="btn btn-danger btn-lg">移除用户</button>
                                       </div>
                                   </form>
                               </div>

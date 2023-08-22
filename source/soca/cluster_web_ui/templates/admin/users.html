@@ -35,11 +35,11 @@
                   <nav>
                      <nav>
                       <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">Add new user</a>
-                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-profile" aria-selected="false">Delete user</a>
-                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-reset" role="tab" aria-controls="nav-contact" aria-selected="false">Reset user password</a>
-                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-admin" role="tab" aria-controls="nav-contact" aria-selected="false">Grant/Revoke Admin permissions</a>
-                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-ldap" role="tab" aria-controls="nav-contact" aria-selected="false">LDAP details</a>
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">添加新用户</a>
+                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-profile" aria-selected="false">删除用户</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-reset" role="tab" aria-controls="nav-contact" aria-selected="false">重置用户密码</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-admin" role="tab" aria-controls="nav-contact" aria-selected="false">授予/撤销管理员权限</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-ldap" role="tab" aria-controls="nav-contact" aria-selected="false">LDAP 详情</a>
                       </div>
                      </nav>
                   <div class="tab-content" id="nav-tabContent">
@@ -47,57 +47,57 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Add New User</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">添加新用户</h6>
                               </div>
                               <div class="card-body">
                               {%  if directory == "activedirectory" %}
                                    <div class="alert alert-primary" role="alert">
-                                        <strong>Important: Active Directory</strong> <br>
-                                       Creating an user on Active Directory can take up to 1 minute. Do not refresh the page while SOCA is creating a new account.
+                                        <strong>重要信息: Active Directory</strong> <br>
+                                       在 Active Directory 上创建用户最多可能需要1分钟。系统正在创建新帐户时，请勿刷新页面。
                                    </div>
                               {% endif %}
 
                                   <form action="/admin/create_user" method="post"
-                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>
+                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "密码不匹配。" : "")'>
                                       <div class="form-group">
-                                          <input id="user" placeholder="User" class="form-control" type="text" required name="user">
+                                          <input id="user" placeholder="用户名" class="form-control" type="text" required name="user">
                                       </div>
                                       <div class="form-group">
-                                          <input id="password" placeholder="Password" class="form-control"  type="password" required name="password">
+                                          <input id="password" placeholder="密码" class="form-control"  type="password" required name="password">
                                       </div>
                                       <div class="form-group">
-                                          <input placeholder="Confirm Password" id="password_verif" class="form-control" type="password" name="password_verif">
+                                          <input placeholder="确认密码" id="password_verif" class="form-control" type="password" name="password_verif">
                                       </div>
 
                                        <div class="form-group">
-                                          <input id="email" placeholder="Email" class="form-control"  type="email" required name="email">
+                                          <input id="email" placeholder="电子邮箱" class="form-control"  type="email" required name="email">
                                       </div>
                                        <div class="form-group">
-                                          <input id="uid" placeholder="(Optional) User UID" class="form-control" type="number" min=5000 max=65534 name="uid">
+                                          <input id="uid" placeholder="(Optional) 用户 UID" class="form-control" type="number" min=5000 max=65534 name="uid">
                                       </div>
                                        <div class="form-group">
-                                          <input id="gid" placeholder="(Optional) User GID" class="form-control" type="number" min=5000 max=65534 name="gid">
+                                          <input id="gid" placeholder="(Optional) 用户 GID" class="form-control" type="number" min=5000 max=65534 name="gid">
                                       </div>
                                       <div class="form-group">
                                            <select class="form-control" id="shell" name="shell">
-                                               <option selected value="/bin/bash">(Default Shell) /bin/bash</option>
-                                               <option value="" disabled="disabled">--Other Shells --</option>
+                                               <option selected value="/bin/bash">(默认 Shell) /bin/bash</option>
+                                               <option value="" disabled="disabled">-- 其他 Shells --</option>
                                             {% for shell in all_shells %}
                                                 <option value="{{shell}}">{{shell}}</option>
                                             {% endfor %}
                                            </select>
                                           <br>
                                           <div class="alert alert-warning">
-                                              <strong>/bin/bash is the preferred shell</strong>. If using a new/custom shell, make sure your shell is installed on all compute nodes
+                                              <strong>/bin/bash 是推荐的 shell。</strong> 如果使用新的/自定义 shell，请确保您的 shell 已安装在所有计算节点上
                                           </div>
                                       </div>
                                       <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="sudo" id="sudo">
-                                          <label class="form-check-label" for="sudo">Enable Sudo Access</label>
+                                          <label class="form-check-label" for="sudo">启用管理员权限</label>
                                       </div>
                                       <div align="center">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                          <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                                          <button type="submit" class="btn btn-primary btn-lg">创建用户</button>
                                       </div>
                                   </form>
                               </div>
@@ -108,16 +108,16 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Delete User</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">删除用户</h6>
                               </div>
                               <div class="card-body">
                                   <div class="alert alert-primary" role="alert">
-                                      <strong>Important </strong>
-                                      Deleting user will prevent user to access the cluster but does not remove associated $HOME directory and data
+                                      <strong>重要 </strong>
+                                      删除用户将阻止用户访问群集，但不会删除关联的 $HOME 目录和数据
                                   </div>
 
                                   <form action="/admin/delete_user" method="post"
-                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>                                  <div class="form-group">
+                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "密码不匹配。" : "")'>                                  <div class="form-group">
                                     <select class="form-control" id="user_to_delete" name="user_to_delete">
                                         {% for user in all_users %}
                                             <option value="{{user}}">{{user}}</option>
@@ -127,11 +127,11 @@
                                   </div>
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="verif" id="verif" required>
-                                          <label class="form-check-label" for="verif">I am sure I want to delete this user</label>
+                                          <label class="form-check-label" for="verif">我确定要删除这个用户</label>
                                       </div>
                                       <div align="center">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                          <button type="submit" class="btn btn-danger btn-lg">Delete User</button>
+                                          <button type="submit" class="btn btn-danger btn-lg">删除用户</button>
                                       </div>
                                   </form>
                               </div>
@@ -141,14 +141,14 @@
                           <br>
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Reset Password</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">重置密码</h6>
                               </div>
                               <div class="card-body">
                                   <div class="alert alert-primary" role="alert">
-                                      <strong>Important </strong>
-                                      This will generate a temporary password for a given user
+                                      <strong>重要 </strong>
+                                      这将为给定用户生成临时密码
                                   </div>
-                                  <form action="/reset_password" method="post" oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>                                       <div class="form-group">
+                                  <form action="/reset_password" method="post" oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "密码不匹配。" : "")'>                                       <div class="form-group">
                                     <select class="form-control" id="user" name="user">
                                         {% for user in all_users %}
                                             <option value="{{user}}">{{user}}</option>
@@ -158,12 +158,12 @@
 
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="admin_reset_verif" id="admin_reset_verif" required>
-                                          <label class="form-check-label" for="admin_reset_verif">I am sure I want to reset the password for this user</label>
+                                          <label class="form-check-label" for="admin_reset_verif">我确认重置这个用户的密码</label>
                                       </div>
                                       <div align="center">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                            <input type="hidden" name="admin_reset" value="yes">
-                                           <button type="submit" class="btn btn-danger btn-lg">Generate temporary password</button>
+                                           <button type="submit" class="btn btn-danger btn-lg">生成临时密码</button>
                                       </div>
                                   </form>
                               </div>
@@ -175,7 +175,7 @@
                     <div class="col-md-6">
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Grant user Admin permission</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">授予用户管理员权限</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/manage_sudo" method="post">
@@ -188,13 +188,13 @@
                                   </div>
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="admin_verif" id="admin_reset_verif" required>
-                                           <label class="form-check-label" for="admin_verif">I am sure I want to <strong>grant</strong> Admin permission to this user</label>
+                                           <label class="form-check-label" for="admin_verif">我确定要给这个用户 <strong>授予</strong> 管理员权限</label>
                                       </div>
                                       <div align="center">
                                           <input type="hidden" name="action" value="grant">
                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                           <button type="submit" class="btn btn-success btn-lg">Grant Admin permission</button>
+                                           <button type="submit" class="btn btn-success btn-lg">授予管理员权限</button>
                                       </div>
                                   </form>
                               </div>
@@ -203,7 +203,7 @@
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">Revoke user Admin permission</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">撤销用户管理员权限</h6>
                               </div>
                               <div class="card-body">
                                   <form action="/admin/manage_sudo" method="post">
@@ -216,13 +216,13 @@
                                   </div>
                                        <div class="form-group form-check">
                                           <input type="checkbox" class="form-check-input" name="sudo_revoke_verif" id="sudo_revoke_verif" required>
-                                           <label class="form-check-label" for="sudo_revoke_verif">I am sure I want to <strong>revoke</strong> Admin permission to this user</label>
+                                           <label class="form-check-label" for="sudo_revoke_verif">我确定要给这个用户 <strong>撤销</strong> 管理员权限</label>
                                       </div>
                                       <div align="center">
                                           <input type="hidden" name="action" value="revoke">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                           <button type="submit" class="btn btn-danger btn-lg">Revoke Admin permission</button>
+                                           <button type="submit" class="btn btn-danger btn-lg">撤销管理员权限</button>
                                       </div>
                                   </form>
                               </div>
@@ -234,19 +234,19 @@
                           <br>
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Technical Details</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">技术细节</h6>
                                 </div>
                                 <div class="card-body">
-                                    Scale-Out Computing on AWS uses OpenLDAP and you can interact with your directory using LDIF directly.
+                                    AWS 上的横向扩展计算使用 OpenLDAP，您可以使用 LDIF 直接与您的目录交互。
                                     <br><br>
                                     <li>People: OU=People,DC=soca,DC=local</li>
                                     <li>Groups: OU=Group,DC=soca,DC=local</li>
-                                    <li>Sudoers: OU=Sudoers,DC=soca,DC=local (This OU manages sudo permission on the cluster)</li>
+                                    <li>Sudoers: OU=Sudoers,DC=soca,DC=local (此 OU 管理集群的 sudo 权限)</li>
                                     <br>
                                     <div class="alert alert-warning" role="alert">
-                                        Admin username and password can be found on <code>/root/OpenLdapAdminUsername.txt</code> and <code>/root/OpenLdapAdminPassword.txt</code>.
+                                        管理员的用户名和密码在这两个文件中： <code>/root/OpenLdapAdminUsername.txt</code> 和 <code>/root/OpenLdapAdminPassword.txt</code>
                                     </div>
-                                    To run ldapadd/ldapmodify manually: ldapadd -x -D cn=admin,dc=soca,dc=local -y /root/OpenLdapAdminPassword.txt -f YOUR_LDIF_FILE
+                                    手动运行 ldapadd/ldapmodify: ldapadd -x -D cn=admin,dc=soca,dc=local -y /root/OpenLdapAdminPassword.txt -f YOUR_LDIF_FILE
                                     <hr>
 
                                 </div>

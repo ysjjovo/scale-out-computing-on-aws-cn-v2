@@ -53,7 +53,7 @@
                                 <form class="ml-auto" action="/my_files/flush_cache" method="post">
                                     <input type="hidden" name="path" value="{{ path }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button data-toggle="tooltip" data-placement="top" title="This folder is cached for better performance and automatically refreshed every {{ default_cache_time/ 60 }} minutes. If you have made a change via SSH/Graphical session and this is not visible yet, you can manually invalidate the cache to load the latest updates" class="btn btn-secondary btn-sm" type="submit"><i class="fas fa-sync"></i> Missing files? Refresh folder cache</button>
+                                    <button data-toggle="tooltip" data-placement="top" title="此文件夹被缓存以获得更好的性能，并每隔 {{ default_cache_time/ 60 }} 分钟自动刷新。如果您已通过SSH/图形会话进行了更改，但该更改尚不可见，则可以手动使缓存无效以加载最新更新" class="btn btn-secondary btn-sm" type="submit"><i class="fas fa-sync"></i> 缺少文件？请尝试刷新文件夹缓存</button>
                               </form>
                            {% endif %}
                           </ol>
@@ -64,7 +64,7 @@
                           <div class="modal-dialog modal-xl" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Upload your content to SOCA</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">上传文件</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
@@ -77,8 +77,8 @@
                                       </div>
                                   </form>
                                   <hr>
-                                  Do not close the page while uploading.<br>
-                                  Upload limited to {{ max_upload_size / 1024 }} GB and {{ max_upload_timeout / 60000 }} minutes timeout. Use the <a href="/sftp">SOCA SFTP solution</a> for larger files or edit the configuration files.
+                                  上传时候请勿关闭这个页面。<br>
+                                  上传限制文件大小最大为 {{ max_upload_size / 1024 }} GB 且超时时间最大为 {{ max_upload_timeout / 60000 }} 分钟。
                               </div>
 
                             </div>
@@ -86,35 +86,35 @@
                         </div>
                       <div class="row">
                            <div class="col-md-5">
-                              <input type="text" id="searchFiles"  class="form-control" placeholder="Search for a file or a folder" aria-controls="list_files_table">
+                              <input type="text" id="searchFiles"  class="form-control" placeholder="搜索文件或文件夹" aria-controls="list_files_table">
                           </div>
                           {% if get_all_uid_count > 0 %}
                           <div class="col-md-2">
                               <div id="div_download_all">
                                   <a href="/my_files/download_all?path={{ path | urlencode }}&ts={{ timestamp }}">
-                                    <button type="button" data-toggle="tooltip" data-placement="top" title="Download all {{ get_all_uid_count }} files on this folder" class="btn btn-info form-control">Download all</button>
+                                    <button type="button" data-toggle="tooltip" data-placement="top" title="下载此文件夹下所有 {{ get_all_uid_count }} 文件" class="btn btn-info form-control">下载所有</button>
                                   </a>
                               </div>
                               <a id="link_download_selected" href="#" style="display: none">
-                                  <button id="btn_download_selected" data-toggle="tooltip" data-placement="top" title="Download selected files" type="button" class="btn btn-info form-control">Download selected</button>
+                                  <button id="btn_download_selected" data-toggle="tooltip" data-placement="top" title="下载选择的文件" type="button" class="btn btn-info form-control">下载选择的文件</button>
                               </a>
                           </div>
                           {% endif %}
                           <div class="col-md-3">
                             <form class="form-inline" method="POST" action="/my_files/create_folder">
                               <div class="input-group">
-                                  <input type="text" size="25" class="form-control" name="folder_name" required placeholder="Folder Name">
+                                  <input type="text" size="25" class="form-control" name="folder_name" required placeholder="文件夹名称">
                                   <div class="input-group-append">
                                       <input type="hidden" name="path" value="{{ path }}/">
                                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                      <button class="btn btn-success" type="submit">Create Folder</button>
+                                      <button class="btn btn-success" type="submit">创建文件夹</button>
                                   </div>
                               </div>
                             </form>
                           </div>
 
                           <div class="col-md-2">
-                              <button type="button" class="btn btn-warning form-control" data-toggle="modal" data-target="#uploadModal">Upload file(s)</button>
+                              <button type="button" class="btn btn-warning form-control" data-toggle="modal" data-target="#uploadModal">上传文件</button>
                           </div>
 
 
@@ -125,10 +125,10 @@
                           <table id="list_files_table" class="table row-border" style="width:100%">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Last Modified</th>
+                <th>文件/文件夹名</th>
+                <th>类型</th>
+                <th>大小</th>
+                <th>修改时间</th>
             </tr>
         </thead>
         <tbody>
@@ -139,11 +139,11 @@
                         <i class="far fa-folder-open fa-lg"></i>
                         <strong><a href="/my_files?path={{ file_data.path | urlencode }}&ts={{ timestamp }}"> {{ file_name }}</a></strong>
                         <div class="float-right">
-                            <a href="/my_files/delete?uid={{ file_data.uid }}"><i data-toggle="tooltip" data-placement="top" title="Delete the folder" class="fas fa-trash-alt fa-lg"  style="color: grey"></i></a>
+                            <a href="/my_files/delete?uid={{ file_data.uid }}"><i data-toggle="tooltip" data-placement="top" title="删除文件夹" class="fas fa-trash-alt fa-lg"  style="color: grey"></i></a>
                         </div>
                     {% else %}
                         {% if file_data.st_size_default > max_online_preview %}
-                            <i class="far fa-question-circle form-check-input" data-toggle="tooltip" data-placement="top" title="This file is too big to be compressed via web. Download file separately or use SFTP."></i>
+                            <i class="far fa-question-circle form-check-input" data-toggle="tooltip" data-placement="top" title="此文件太大，无法通过Web压缩。单独下载文件或使用SFTP。"></i>
                         {% else %}
                             <input type="checkbox" onchange="SelectedFiles(this.id)" class="form-check-input" id="{{ file_data.uid }}">
                         {% endif %}
@@ -170,35 +170,35 @@
                         </a>
 
                      <div class="float-right">
-                         <a href="/my_files/download?uid={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="Download this file" class="fa fa-file-download fa-lg"  style="color: grey"></i></a>
-                         <a href="/submit_job?input_file={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="Use as simulation input" class="fas fa-microchip fa-lg"  style="color: grey"></i></a>
+                         <a href="/my_files/download?uid={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="下载文件" class="fa fa-file-download fa-lg"  style="color: grey"></i></a>
+                         <a href="/submit_job?input_file={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="用于模拟输入" class="fas fa-microchip fa-lg"  style="color: grey"></i></a>
                          {% if file_data.st_size_default > max_online_preview %} <!-- Unable to edit file bigger than 150 mb via web -->
-                             <a style="cursor: pointer" target="_blank" data-toggle="modal" data-target="#fileToBig"><i data-toggle="tooltip" data-placement="top" title="View or Edit this file" class="fas fa-edit fa-lg" style="color: grey"></i></a>
+                             <a style="cursor: pointer" target="_blank" data-toggle="modal" data-target="#fileToBig"><i data-toggle="tooltip" data-placement="top" title="查看或编辑文件" class="fas fa-edit fa-lg" style="color: grey"></i></a>
                          {% else %}
-                            <a target="_blank" href="/editor?uid={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="View or Edit this file" class="fas fa-edit fa-lg" style="color: grey"></i></a>
+                            <a target="_blank" href="/editor?uid={{ file_data.uid }}&ts={{ timestamp }}"><i data-toggle="tooltip" data-placement="top" title="查看或编辑文件" class="fas fa-edit fa-lg" style="color: grey"></i></a>
                          {% endif %}
 
-                         <a data-toggle="modal" data-target="#deleteModal{{ loop.index }}"><i data-toggle="tooltip" data-placement="top" title="Delete file" style="cursor: pointer" class="fas fa-trash-alt fa-lg" style="color: grey"></i></a>
+                         <a data-toggle="modal" data-target="#deleteModal{{ loop.index }}"><i data-toggle="tooltip" data-placement="top" title="删除文件" style="cursor: pointer" class="fas fa-trash-alt fa-lg" style="color: grey"></i></a>
                      </div>
                         <!-- Begin Modal DELETE -->
                         <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1" role="dialog"  aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h5 class="modal-title">Entering the danger zone</h5>
+                                <h5 class="modal-title">进入危险区域</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
                               </div>
                               <div class="modal-body">
                                   <div class="alert alert-danger">
-                                        <h4 class="alert-heading">Attention</h4>
+                                        <h4 class="alert-heading">注意</h4>
 
-                                      You are about to permanently delete <strong>{{ file_name }}</strong> from the filesystem. <br>
-                                      This action cannot be reversed.
+                                      您即将永久删除 <strong>{{ file_name }}</strong><br>
+                                      此行为无法被撤销。
                                   </div>
                                   <a href="/my_files/delete?uid={{ file_data.uid }}&ts={{ timestamp }}">
-                                      <button type="button" class="btn btn-danger form-control">Delete this file</button>
+                                      <button type="button" class="btn btn-danger form-control">删除此文件</button>
                                   </a>
                               </div>
                             </div>
@@ -231,13 +231,13 @@
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h5 class="modal-title">Unable to preview this file via web</h5>
+                                <h5 class="modal-title">无法通过Web预览此文件</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
                               </div>
                               <div class="modal-body">
-                                  This file is too big and cannot be preview via web. <br> Please <a href="/sftp"> download a copy </a> or open it via <a href="/remote_desktop">remote desktop (DCV)</a> or <a href="/ssh"> cli (via SSH)</a>
+                                  此文件太大，无法通过Web预览。<br>
                               </div>
                             </div>
                           </div>
@@ -316,7 +316,7 @@
                               pagingType: "full_numbers",
                               lengthMenu: [[100, 300, 500, -1], [100, 300, 500, "All"]],
                               language: {
-                                emptyTable: "<h4>No files in this directory</h4>",
+                                emptyTable: "<h4>无文件</h4>",
                               },
                               //'sDom': 'tpl',
                               dom: "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4'l><'col-sm-8'p>>",

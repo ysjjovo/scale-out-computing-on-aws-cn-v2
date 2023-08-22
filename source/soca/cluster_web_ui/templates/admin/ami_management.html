@@ -14,8 +14,8 @@
                 {% include 'common/horizontal_menu_bar.html' %}
                 {% if sudoers == false %}
                     <div class="alert alert-danger" role="alert">
-                        <strong>Access denied </strong>
-                        Only users with sudo permissions can access this page
+                        <strong>拒绝访问 </strong>
+                        只有具有 sudo 权限的用户才能访问此页面
                         <br>
                     </div>
                 {% else %}
@@ -38,16 +38,16 @@
                     {% endwith %}
                     <div class="col-md-10">
                        <div class="alert alert-warning">
-                        Make sure your Amazon Machine Images (AMI) are generated for your current region: <strong>{{ region_name }}</strong> <br>
-                           <a  target="_blank" href="https://awslabs.github.io/scale-out-computing-on-aws/tutorials/reduce-compute-node-launch-time-with-custom-ami/">Click here to learn how to create custom images</a>
+                        确保您的 Amazon 机器映像(AMI)是在您当前区域生成的: <strong>{{ region_name }}</strong> <br>
+                           <a  target="_blank" href="https://awslabs.github.io/scale-out-computing-on-aws/tutorials/reduce-compute-node-launch-time-with-custom-ami/">点击查看如何创建自定义镜像</a>
 
                     </div>
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add"
-                               role="tab" aria-controls="nav-home" aria-selected="true">Register AMI</a>
+                               role="tab" aria-controls="nav-home" aria-selected="true">注册 AMI</a>
                             <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete"
-                               role="tab" aria-controls="nav-delete" aria-selected="false">Delete AMI</a>
+                               role="tab" aria-controls="nav-delete" aria-selected="false">删除 AMI</a>
                         </div>
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
@@ -57,19 +57,19 @@
                             <br>
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Register a new Amazon Machine Image (AMI)</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">注意一个新的 Amazon Machine Image (AMI)</h6>
                                 </div>
                                 <div class="card-body">
                                     <form action="/admin/ami_management/create" method="post">
                                         <div class="form-group">
-                                            <label for="ami_id" data-toggle="tooltip" data-placement="top" title="Unique ID of your Amazon image. Must be a valid image, start with ami- and between 8 to 21 chars">AMI ID</label>
-                                            <input id="ami_id" placeholder="Image ID (start with ami-xxx)" class="form-control"
+                                            <label for="ami_id" data-toggle="tooltip" data-placement="top" title="您的亚马逊镜像中的唯一 ID。必须是有效的镜像，以 ami 开头，长度在8到21个字符之间">AMI ID</label>
+                                            <input id="ami_id" placeholder="镜像 ID (以 ami-xxx 开头)" class="form-control"
                                                    type="text"
                                                    required name="ami_id" minlength="8" maxlength="21">
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="os" data-toggle="tooltip" data-placement="top" title="Select whether this image is Linux or Windows based" >Operating System</label>
+                                            <label for="os" data-toggle="tooltip" data-placement="top" title="选择此镜像是基于 Linux 还是基于 Windows" >操作系统</label>
                                             <select class="form-control" id="os" name="os">
                                                 <option value="windows">Windows</option>
                                                 <option value="rhel7">Linux - RHEL7</option>
@@ -79,7 +79,7 @@
                                         </div>
 
                                          <div class="form-group">
-                                            <label data-toggle="tooltip" data-placement="top" title="The minimum size (in GB) of the root disk for this image. Provisioning an instance with a lower EBS size will throw an error" for="root_size">Root Disk Size (in GB)</label>
+                                            <label data-toggle="tooltip" data-placement="top" title="此镜像的根磁盘的最小大小(GB)。为实例提供较小的 EBS 大小将引发错误" for="root_size">根磁盘大小(GB)</label>
                                             <input type="number" min=0 value=30 id="root_size"
                                                    class="form-control" type="number"
                                                    required name="root_size">
@@ -87,8 +87,8 @@
 
 
                                         <div class="form-group">
-                                            <label for="ami_label" data-toggle="tooltip" data-placement="top" title="Choose a friendly name for your AMI. Labels must be unique " >AMI Label</label>
-                                            <input id="ami_label" placeholder="Enter friendly AMI Name"
+                                            <label for="ami_label" data-toggle="tooltip" data-placement="top" title="为您的 AMI 选择一个友好的名称。标签必须是唯一的" >AMI 标签</label>
+                                            <input id="ami_label" placeholder="请输入一个有意义的 AMI 名称"
                                                    class="form-control" type="text"
                                                    required name="ami_label">
                                         </div>
@@ -96,7 +96,7 @@
                                         <div align="justify">
                                             <input type="hidden" name="csrf_token"
                                                    value="{{ csrf_token() }}">
-                                            <button type="submit" class="btn btn-primary btn-lg">Register AMI in SOCA
+                                            <button type="submit" class="btn btn-primary btn-lg">注册 AMI
                                             </button>
                                         </div>
                                     </form>
@@ -108,12 +108,12 @@
                             <br>
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Delete an AMI</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">删除 AMI</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-primary" role="alert">
-                                        <strong>Important </strong>
-                                        Deleting AMI from SOCA will not un-register AMI from your AWS account
+                                        <strong>重要 </strong>
+                                        从系统中删除 AMI 不会从您的 AWS 帐户中注销 AMI
                                     </div>
 
                                     {%  if ami_infos %}
@@ -130,8 +130,7 @@
                                             <div class="form-group form-check">
                                                 <input type="checkbox" class="form-check-input" name="verif" id="verif"
                                                        required>
-                                                <label class="form-check-label" for="verif">I am sure I want to delete this
-                                                    ami from SOCA</label>
+                                                <label class="form-check-label" for="verif">我确认从系统中删除此 AMI</label>
                                             </div>
                                             <div align="justify">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -139,7 +138,7 @@
                                             </div>
                                         </form>
                                         {% else %}
-                                        No custom AMI found. Create one first
+                                        找不到自定义的 AMI。请先创建
                                         {% endif %}
                                 </div>
                             </div>
